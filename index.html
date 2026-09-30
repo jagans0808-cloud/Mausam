@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Mausam - Advanced Personalized Meteorological Platform delivering hyper-local forecasts and lifestyle intelligence.">
+  <title>Mausam — Personalized Meteorological Platform</title>
+
+  <!-- Mobile Device & PWA Web App Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mausam">
+  <meta name="theme-color" content="#0a0f1d">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons for weather & dashboard components -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Leaflet CSS for Interactive Weather Radar & Live Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+  <!-- Application Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Dynamic Lighting Orbs -->
+  <div class="bg-ambient-orb orb-1" id="ambientOrb1"></div>
+  <div class="bg-ambient-orb orb-2" id="ambientOrb2"></div>
+
+  <div id="app-container">
+
+    <!-- ====================================================================
+         SCREEN 1: WELCOME & LOCATION SELECTION SCREEN
+         ==================================================================== -->
+    <main id="screen-welcome" class="app-screen active-screen" role="main">
+      <div class="welcome-container">
+        <div class="badge brand-badge">
+          <i class="fa-solid fa-satellite-dish"></i> National Weather &bull; Climate Intelligence Network
+        </div>
+
+        <div class="brand-logo-wrap">
+          <div class="brand-logo-icon">
+            <i class="fa-solid fa-cloud-sun-rain"></i>
+          </div>
+        </div>
+
+        <h1 class="welcome-title">Welcome to Mausam</h1>
+        <p class="welcome-subtitle">
+          Next-generation personalized meteorological platform engineered for India's diverse climates and lifestyles.
+        </p>
+
+        <!-- Location Selection Glass Card -->
+        <div class="glass-panel location-selector-card">
+          
+          <!-- Device GPS Auto-Sync Button -->
+          <button id="btnUseDeviceGPS" class="btn btn-secondary device-gps-btn" title="Use current GPS location coordinates">
+            <i class="fa-solid fa-crosshairs gps-icon"></i>
+            <span id="gpsButtonLabel">Detect My Current Location (Device GPS)</span>
+          </button>
+
+          <label for="citySearchInput" class="city-chips-label">
+            <i class="fa-solid fa-location-dot"></i> Search or select any global or Indian location:
+          </label>
+
+          <!-- Search Input with Live Autocomplete -->
+          <div class="search-input-group-wrap">
+            <div class="search-input-group">
+              <i class="fa-solid fa-magnifying-glass search-leading-icon"></i>
+              <input 
+                type="text" 
+                id="citySearchInput" 
+                class="city-search-input" 
+                placeholder="Search city, town, or state (e.g. Pune, London, Srinagar...)"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-controls="cityAutocompleteDropdown"
+              />
+              <button id="btnClearSearch" class="btn-clear-search" style="display: none;" title="Clear search" aria-label="Clear search input">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <!-- Live Open-Meteo Autocomplete Dropdown -->
+            <div class="autocomplete-dropdown" id="cityAutocompleteDropdown" style="display: none;" role="listbox"></div>
+          </div>
+
+          <div class="city-chips-label">
+            <i class="fa-solid fa-fire-flame-curved"></i> Popular Meteorological Centers:
+          </div>
+
+          <div class="city-chips-container" id="cityChipsContainer">
+            <!-- City chips rendered dynamically or initialized via JS -->
+            <button class="city-chip selected-chip" data-city="New Delhi"><i class="fa-solid fa-location-pin"></i> New Delhi</button>
+            <button class="city-chip" data-city="Mumbai"><i class="fa-solid fa-location-pin"></i> Mumbai</button>
+            <button class="city-chip" data-city="Bengaluru"><i class="fa-solid fa-location-pin"></i> Bengaluru</button>
+            <button class="city-chip" data-city="Shimla"><i class="fa-solid fa-location-pin"></i> Shimla</button>
+            <button class="city-chip" data-city="Chennai"><i class="fa-solid fa-location-pin"></i> Chennai</button>
+            <button class="city-chip" data-city="Jaipur"><i class="fa-solid fa-location-pin"></i> Jaipur</button>
+            <button class="city-chip" data-city="Kolkata"><i class="fa-solid fa-location-pin"></i> Kolkata</button>
+            <button class="city-chip" data-city="Kochi"><i class="fa-solid fa-location-pin"></i> Kochi</button>
+            <button class="city-chip" data-city="Hyderabad"><i class="fa-solid fa-location-pin"></i> Hyderabad</button>
+            <button class="city-chip" data-city="Pune"><i class="fa-solid fa-location-pin"></i> Pune</button>
+            <button class="city-chip" data-city="Ahmedabad"><i class="fa-solid fa-location-pin"></i> Ahmedabad</button>
+            <button class="city-chip" data-city="Srinagar"><i class="fa-solid fa-location-pin"></i> Srinagar</button>
+            <button class="city-chip" data-city="Goa"><i class="fa-solid fa-location-pin"></i> Goa</button>
+            <button class="city-chip" data-city="Chandigarh"><i class="fa-solid fa-location-pin"></i> Chandigarh</button>
+          </div>
+        </div>
+
+        <div class="welcome-cta-wrap">
+          <button id="btnContinueToProfile" class="btn btn-primary welcome-cta-btn">
+            <span>Continue to Profile Selection</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- ====================================================================
+         SCREEN 2: USER PROFILE SELECTION SCREEN (8 Profiles)
+         ==================================================================== -->
+    <section id="screen-profile" class="app-screen" aria-label="User Profile Selection">
+      <div class="profile-screen-container">
+        
+        <!-- Navigation Header -->
+        <div class="screen-header-nav">
+          <button id="btnBackToLocation" class="btn btn-secondary back-btn">
+            <i class="fa-solid fa-chevron-left"></i> Change Location (<span id="profileNavCityLabel">New Delhi</span>)
+          </button>
+          <div class="badge">
+            <i class="fa-solid fa-sliders"></i> Persona Setup
+          </div>
+        </div>
+
+        <div class="profile-header-text">
+          <h2 class="profile-title">Select Your User Persona</h2>
+          <p class="profile-subtitle">
+            Mausam customizes weather metrics, risk thresholds, and daily advisories according to your specific daily lifestyle and domain needs.
+          </p>
+        </div>
+
+        <!-- 8 Profiles Grid -->
+        <div class="profiles-grid" id="profilesGridContainer">
+          <!-- Profile cards populated by JavaScript (Health, Fitness, Travel, Beach, Family, Agriculture, Commuter, Event Planner) -->
+        </div>
+
+        <!-- Bottom Action Confirmation Bar -->
+        <div class="profile-cta-bar">
+          <div class="selected-profile-status">
+            <span class="status-label">Active Selection:</span>
+            <span class="status-value" id="selectedProfileNameDisplay">Health</span>
+          </div>
+          <button id="btnProceedToDashboard" class="btn btn-primary">
+            <span>Launch Personalized Dashboard</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SCREEN 3: PERSONALIZED HOME SCREEN (DASHBOARD)
+         ==================================================================== -->
+    <section id="screen-home" class="app-screen" aria-label="Personalized Weather Dashboard">
+      <div class="dashboard-container">
+
+        <!-- Top Navigation & Control Bar -->
+        <header class="dashboard-topbar">
+          <div class="dash-brand-wrap">
+            <div class="dash-logo-icon">
+              <i class="fa-solid fa-cloud-sun"></i>
+            </div>
+            <div>
+              <div class="dash-brand-name">Mausam</div>
+            </div>
+            <span class="badge dash-platform-tag">Meteorological Intelligence</span>
+          </div>
+
+          <div class="dash-controls-wrap">
+            <!-- Live Meteorological Telemetry Source Badge -->
+            <div class="live-source-badge" id="liveSourceBadge" title="Live telemetry provided by Open-Meteo meteorological API">
+              <span class="pulse-dot live-pulse"></span>
+              <span id="liveSourceText">LIVE Open-Meteo</span>
+            </div>
+
+            <!-- Refresh Weather Button -->
+            <button id="btnRefreshData" class="active-pill-btn icon-only-pill" title="Refresh Live Telemetry" aria-label="Refresh live data">
+              <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i>
+            </button>
+
+            <!-- Live Weather Radar & Map Modal Trigger -->
+            <button id="btnOpenRadarModal" class="active-pill-btn radar-pill" title="Open Interactive Weather Radar & Live Map">
+              <i class="fa-solid fa-satellite-dish"></i>
+              <span>Radar & Map</span>
+            </button>
+
+            <!-- AI Voice Weather Briefing Button -->
+            <button id="btnVoiceBriefing" class="active-pill-btn voice-pill" title="Listen to AI Spoken Weather Briefing">
+              <i class="fa-solid fa-volume-high" id="voiceIcon"></i>
+              <span id="voiceLabel">Briefing</span>
+            </button>
+
+            <!-- Temperature Unit Switcher (°C / °F) -->
+            <button id="btnUnitToggle" class="active-pill-btn unit-pill" title="Switch temperature unit (°C / °F)" aria-label="Toggle temperature unit">
+              <span id="unitToggleLabel">°C</span>
+            </button>
+
+            <!-- Light / Dark Theme Switcher -->
+            <button id="btnThemeToggle" class="active-pill-btn icon-only-pill" title="Toggle Light / Dark Mode" aria-label="Toggle theme">
+              <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
+            </button>
+
+            <!-- Live Clock Badge -->
+            <div class="live-clock-badge" id="liveClockBadge" title="Live Local Indian Standard Time (IST)">
+              <span class="pulse-dot"></span>
+              <span id="liveTimeText">--:--:-- IST</span>
+            </div>
+
+            <!-- Location Switcher Trigger Button -->
+            <button id="btnDashChangeCity" class="active-pill-btn" title="Click to change location">
+              <i class="fa-solid fa-location-dot"></i>
+              <span id="dashCurrentCityLabel">New Delhi</span>
+              <i class="fa-solid fa-caret-down" style="font-size: 0.75rem;"></i>
+            </button>
+
+            <!-- Profile Switcher Trigger Button -->
+            <button id="btnDashChangeProfile" class="active-pill-btn profile-pill" title="Click to change profile">
+              <i class="fa-solid fa-user-gear"></i>
+              <span id="dashCurrentProfileLabel">Health Profile</span>
+              <i class="fa-solid fa-caret-down" style="font-size: 0.75rem;"></i>
+            </button>
+
+            <!-- Device Native Share Sheet Trigger Button -->
+            <button id="btnNativeShare" class="active-pill-btn share-pill" title="Share Weather Briefing" aria-label="Share weather briefing">
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Quick Profile Switcher Strip (Allows rapid persona switching) -->
+        <nav class="glass-panel profile-quick-switcher" aria-label="Quick profile switch">
+          <span class="quick-switch-label">
+            <i class="fa-solid fa-layer-group"></i> Switch Persona:
+          </span>
+          <div class="quick-profiles-list" id="quickProfilesList">
+            <!-- Generated dynamically -->
+          </div>
+        </nav>
+
+        <!-- Priority Severe Weather Alert Area (Visible across all profiles when active) -->
+        <div id="severeAlertArea" style="display: none;">
+          <!-- Injected dynamically by PersonalizationEngine -->
+        </div>
+
+        <!-- Main Dashboard 2-Column Grid -->
+        <div class="dashboard-grid-layout">
+
+          <!-- Primary Column: Persona-Specific Dynamic Content & 24-Hour Trend -->
+          <div class="dash-col-primary">
+
+            <!-- Dynamic Persona Section (Fully dynamically swapped based on selected profile) -->
+            <div id="personaDynamicContainer" class="persona-dashboard-section">
+              <!-- Dynamically populated for Health, Fitness, Travel, Beach, Family, Agriculture, Commuter, or Event Planner -->
+            </div>
+
+            <!-- 24-Hour Hourly Forecast Strip -->
+            <div class="glass-panel hourly-forecast-card">
+              <div class="section-title-wrap">
+                <h3 class="section-title">
+                  <i class="fa-regular fa-clock" style="color: var(--accent-primary);"></i>
+                  <span>24-Hour Meteorological Trend</span>
+                </h3>
+                <span class="badge"><i class="fa-solid fa-chart-line"></i> Hourly Outlook</span>
+              </div>
+
+              <div class="hourly-track" id="hourlyTrackContainer">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- Secondary Column: Hero Weather, Regional Climate & 7-Day Forecast -->
+          <div class="dash-col-secondary">
+
+            <!-- Hero Current Weather Card -->
+            <div class="glass-panel hero-weather-card" id="heroWeatherCard">
+              <div class="hero-header-row">
+                <div>
+                  <h2 class="hero-location-title" id="heroCityName">
+                    <span>New Delhi</span>
+                    <i class="fa-solid fa-circle-check" style="font-size: 1rem; color: var(--accent-primary);"></i>
+                  </h2>
+                  <div class="hero-country-tag" id="heroRegionText">Delhi NCR, India &bull; <span id="heroElevationText">216 m ASL</span></div>
+                </div>
+                <div class="hero-date-display">
+                  <div id="heroLiveClock" style="font-weight: 700; color: var(--accent-primary); font-size: 0.95rem;">--:-- IST</div>
+                  <div id="heroDateDisplay">Wednesday, 30 Sep</div>
+                </div>
+              </div>
+
+              <div class="hero-main-stats">
+                <div>
+                  <div class="hero-temp-wrap">
+                    <span class="hero-temp-val" id="heroTempVal">28</span>
+                    <span class="hero-temp-unit" id="heroTempUnit">°C</span>
+                  </div>
+                  <div class="hero-condition-summary">
+                    <div class="hero-condition-text" id="heroConditionText">Hazy Sunshine</div>
+                    <div class="hero-feels-like" id="heroFeelsLikeText">Feels like 29°C &bull; High: 32°C &bull; Low: 19°C</div>
+                  </div>
+                </div>
+
+                <div class="hero-weather-art" id="heroWeatherArt">
+                  <i class="fa-solid fa-sun" style="color: #fbbf24;"></i>
+                </div>
+              </div>
+
+              <!-- Mini Highlights Strip -->
+              <div class="hero-highlights-strip">
+                <div class="hero-mini-stat">
+                  <i class="fa-solid fa-droplet"></i>
+                  <span>Humidity: <strong id="heroHumidityVal">54%</strong></span>
+                </div>
+                <div class="hero-mini-stat">
+                  <i class="fa-solid fa-wind"></i>
+                  <span>Wind: <strong id="heroWindVal">14 km/h WNW</strong></span>
+                </div>
+                <div class="hero-mini-stat">
+                  <i class="fa-solid fa-cloud-rain"></i>
+                  <span>Precipitation: <strong id="heroRainVal">10%</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Regional Climate Profile & Seasonality Card -->
+            <div class="glass-panel climate-profile-card">
+              <div class="section-title-wrap">
+                <h3 class="section-title">
+                  <i class="fa-solid fa-earth-asia" style="color: var(--accent-primary);"></i>
+                  <span>Regional Climate Profile</span>
+                </h3>
+                <span class="badge" id="climateElevationBadge">216 m ASL</span>
+              </div>
+              
+              <div class="climate-stats-grid">
+                <div class="climate-stat-box">
+                  <div class="climate-stat-label"><i class="fa-solid fa-compass"></i> Climate Zone</div>
+                  <div class="climate-stat-val" id="climateZoneVal">Semi-Arid (Köppen BSh)</div>
+                  <div class="climate-stat-sub">Macro-Climatic Zone</div>
+                </div>
+                <div class="climate-stat-box">
+                  <div class="climate-stat-label"><i class="fa-solid fa-calendar-days"></i> Current Season</div>
+                  <div class="climate-stat-val" id="climateSeasonVal">Post-Monsoon Transition</div>
+                  <div class="climate-stat-sub">Seasonal Cycle</div>
+                </div>
+                <div class="climate-stat-box">
+                  <div class="climate-stat-label"><i class="fa-solid fa-temperature-half"></i> Temp Departure</div>
+                  <div class="climate-stat-val" id="climateTempDepartureVal">+0.6°C Departure</div>
+                  <div class="climate-stat-sub">vs 30-Yr Climate Normal</div>
+                </div>
+                <div class="climate-stat-box">
+                  <div class="climate-stat-label"><i class="fa-solid fa-cloud-rain"></i> Rainfall Status</div>
+                  <div class="climate-stat-val" id="climateRainfallVal">Seasonal Normal</div>
+                  <div class="climate-stat-sub">Monsoon Dep. Index</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7-Day Extended Forecast Card -->
+            <div class="glass-panel daily-forecast-card">
+              <div class="section-title-wrap">
+                <h3 class="section-title">
+                  <i class="fa-regular fa-calendar-days" style="color: var(--accent-primary);"></i>
+                  <span>7-Day Extended Forecast</span>
+                </h3>
+                <span class="badge">Next 7 Days</span>
+              </div>
+
+              <div class="daily-list" id="dailyForecastList">
+                <!-- Injected dynamically via JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <p>
+        <strong>Mausam Personalized Weather Platform</strong> &bull; National Meteorological Observation Network
+      </p>
+      <p style="margin-top: 0.25rem;">
+        Hyper-Local Atmospheric Intelligence &bull; Multi-Domain Personalization Engine &bull; Real-Time Telemetry
+      </p>
+    </footer>
+
+    <!-- Native Mobile Bottom Dock (Mobile App Bar) -->
+    <nav class="mobile-bottom-dock" id="mobileBottomDock" aria-label="Mobile Navigation">
+      <button class="mobile-dock-btn" id="mobileDockCityBtn" title="Change City">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>Location</span>
+      </button>
+      <button class="mobile-dock-btn" id="mobileDockRadarBtn" title="Interactive Radar & Map">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <span>Radar</span>
+      </button>
+      <button class="mobile-dock-btn active-dock-btn" id="mobileDockHomeBtn" title="Personalized Home">
+        <i class="fa-solid fa-house-chimney-window"></i>
+        <span>Mausam</span>
+      </button>
+      <button class="mobile-dock-btn" id="mobileDockPersonaBtn" title="Change Persona">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>Persona</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Interactive Weather Radar & Live Map Modal -->
+  <div id="radarModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-label="Interactive Weather Radar Map">
+    <div class="modal-content glass-panel radar-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="radar-modal-icon">
+            <i class="fa-solid fa-satellite-dish"></i>
+          </div>
+          <div>
+            <h3 class="modal-title">Live Weather Radar & Station Map</h3>
+            <p class="modal-subtitle">Real-time precipitation radar & interactive point-and-click meteorological forecast</p>
+          </div>
+        </div>
+        <div class="radar-modal-actions">
+          <span class="badge radar-live-badge"><i class="fa-solid fa-circle-dot"></i> RainViewer & OSM Live</span>
+          <button id="btnCloseRadarModal" class="modal-close-btn" title="Close Radar Modal" aria-label="Close modal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="radar-modal-body">
+        <div class="radar-controls-strip">
+          <div class="radar-layer-toggles">
+            <button class="radar-layer-btn active-radar-layer" id="btnRadarPrecip">
+              <i class="fa-solid fa-cloud-showers-heavy"></i> RainViewer Radar
+            </button>
+            <button class="radar-layer-btn" id="btnRadarStandard">
+              <i class="fa-solid fa-map"></i> OpenStreetMap Base
+            </button>
+          </div>
+          <div class="radar-hint">
+            <i class="fa-solid fa-hand-pointer"></i> Click anywhere on the map to inspect live weather for that location!
+          </div>
+        </div>
+        <div id="weatherRadarMap" class="weather-radar-map-view"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Leaflet JS for Weather Radar & Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Application Scripts -->
+  <script src="mockData.js"></script>
+  <script src="personalizationEngine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
